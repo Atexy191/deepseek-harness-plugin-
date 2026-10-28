@@ -29,7 +29,7 @@
 插件以 zip / bundle 目录发布。以 `dsh-memory-fs` 为例：
 
 1. 从 [Releases](https://github.com/Atexy191/deepseek-harness-plugin-/releases) 下载对应 zip；
-2. 解压到工作目录（例如 `/root/dsh-workspace/dsh-memory-fs`）；
+2. 解压到工作目录（例如 `~/dsh-workspace/dsh-memory-fs`）；
 3. 在 DSH 里用 `plugin_manager` 的 `install_bundle` 指向这个目录；
 4. 面板里的设置会即时生效，不需要重启。
 
