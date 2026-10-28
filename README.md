@@ -3,6 +3,10 @@
 > 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 写的一组插件。
 > 代码由 **猫猫（YumeNoNaka）** 写，需求、服务器和验收由 **倾已然（Atexy191）** 出。
 
+> **1.0.1（2026-10-29）**：作者优化了版本，更新了内部代码，以获得更快的速度。
+> 建议使用 1.0.1；发现问题欢迎直接开 [issue](https://github.com/Atexy191/deepseek-harness-plugin-/issues)。
+
+
 ## 作者
 
 | 名字 | 做了什么 |
