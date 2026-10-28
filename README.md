@@ -17,6 +17,8 @@
 | 插件 | 一句话 | 状态 |
 | --- | --- | --- |
 | [dsh-memory-fs](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%AE%B0%E5%BF%86) | 文件是真相源、SQLite 只是派生索引的混合检索记忆插件 | 已发布 |
+| [dsh-token-saver](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E7%9C%81token) | 每轮开始折叠旧工具输出，压小上下文省 token | 已发布 |
+| [dsh-qq-brain](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/QQ%E6%8E%A5%E7%AE%A1) | 把 QQ 消息接进 DSH 会话：同一人格、记忆、模型与工具 | 已发布 |
 | dsh-model-fallback | 选 1~3 个模型组成降级链，前一个失败自动换下一个 | 准备中 |
 | dsh-cat-theme | 「墨与金」界面主题：暖墨底 + 金色强调，只改配色不动状态色 | 准备中 |
 
