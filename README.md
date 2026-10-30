@@ -3,11 +3,6 @@
 > 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 写的一组插件。
 > 代码由 **猫猫（YumeNoNaka）** 写，需求、服务器和验收由 **倾已然（Atexy191）** 出。
 
-> **1.0.1（2026-10-29）**：作者优化了版本，更新了内部代码，以获得更快的速度。
-> 建议使用 1.0.1；发现问题欢迎直接开 [issue](https://github.com/Atexy191/deepseek-harness-plugin-/issues)，
-> 或者发邮件到 **atexy191@163.com**。
-
-
 ## 作者
 
 | 名字 | 做了什么 |
@@ -21,7 +16,7 @@
 
 | 插件 | 一句话 | 状态 |
 | --- | --- | --- |
-| [dsh-memory-fs](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%AE%B0%E5%BF%86) | 文件是真相源、SQLite 只是派生索引的混合检索记忆插件 | 已发布 |
+| [dsh-memory-fs](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%AE%B0%E5%BF%86) | 文件是真相源、SQLite 只是派生索引的混合检索记忆插件；1.1 起带热层与面板 | 已发布 |
 | [dsh-token-saver](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E7%9C%81token) | 每轮开始折叠旧工具输出，压小上下文省 token | 已发布 |
 | [dsh-qq-brain](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/QQ%E6%8E%A5%E7%AE%A1) | 把 QQ 消息接进 DSH 会话：同一人格、记忆、模型与工具 | 已发布 |
 | dsh-model-fallback | 选 1~3 个模型组成降级链，前一个失败自动换下一个 | 准备中 |
@@ -34,7 +29,7 @@
 插件以 zip / bundle 目录发布。以 `dsh-memory-fs` 为例：
 
 1. 从 [Releases](https://github.com/Atexy191/deepseek-harness-plugin-/releases) 下载对应 zip；
-2. 解压到工作目录（例如 `~/dsh-workspace/dsh-memory-fs`）；
+2. 解压到工作目录（例如 `/root/dsh-workspace/dsh-memory-fs`）；
 3. 在 DSH 里用 `plugin_manager` 的 `install_bundle` 指向这个目录；
 4. 面板里的设置会即时生效，不需要重启。
 
