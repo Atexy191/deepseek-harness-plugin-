@@ -16,7 +16,7 @@
 
 | 插件 | 一句话 | 状态 |
 | --- | --- | --- |
-| [joint-memory](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%81%94%E5%90%88%E8%AE%B0%E5%BF%86) | 2.1.0：四层记忆（文件是真相源，索引只是派生品），核心零宿主依赖，任何 AI 都能用；2.1.0 加了按会话的隐私隔离（`scopeMapFile`）、热层、`jm_settings`/`jm_review`/`jm_consolidate`/`jm_flush`；包内附 `AGENT-GUIDE.md`（教别的 AI 自己建向量、调权重）与三层隐私自检 | 已发布 |
+| [joint-memory](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%81%94%E5%90%88%E8%AE%B0%E5%BF%86) | 2.5.0：四层记忆（文件是真相源，索引只是派生品），核心零宿主依赖，任何 AI 都能用；2.1.0 加了按会话的隐私隔离（`scopeMapFile`）、热层、`jm_settings`/`jm_review`/`jm_consolidate`/`jm_flush`；包内附 `AGENT-GUIDE.md`（教别的 AI 自己建向量、调权重）与三层隐私自检 | 已发布 |
 | [dsh-token-saver](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E7%9C%81token) | 每轮开始折叠旧工具输出，压小上下文省 token | 已发布 |
 | [dsh-qq-brain](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/QQ%E6%8E%A5%E7%AE%A1) | 把 QQ 消息接进 DSH 会话：同一人格、记忆、模型与工具 | 已发布 |
 | dsh-model-fallback | 选 1~3 个模型组成降级链，前一个失败自动换下一个 | 准备中 |
