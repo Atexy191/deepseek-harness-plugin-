@@ -3,6 +3,29 @@
 > 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 写的一组插件。
 > 代码由 **猫猫（YumeNoNaka）** 写，需求、服务器和验收由 **倾已然（Atexy191）** 出。
 
+## English (short)
+
+Plugins for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Written by **maomao (YumeNoNaka)**, specified and deployed by **Atexy191**.
+
+**`joint-memory` — long-term memory that any AI agent can use.** Four layers, but only one source of truth:
+
+```
+context (host window)  ->  vector digest (markdown + index)  ->  cold store (raw sessions)  ->  disk backup
+```
+
+- **File-first**: markdown is the only authority. `index.sqlite`, vectors, caches, hot layer are all derived — delete them and `jm sync` rebuilds.
+- **Zero runtime dependencies**, Node >= 22.5 (built-in `node:sqlite`). One zip, no install step.
+- **MCP stdio** ready: `jm serve` (5 core tools; cold-store tools off by default behind `JM_EXPOSE_COLD=1`).
+- **Portable**: `--root /any/dir`; flat or nested layout auto-detected; works with Claude Code / Cursor / Codex / shell agents.
+- **Honest retrieval**: hybrid BM25 + vector + weighted RRF + time decay, with a content-word coverage gate so unrelated queries return **0 results** instead of noise. Benchmark: `node bench/run.mjs` — 15 memories x 30 questions, 5 categories (single-hop / multi-hop / temporal / adversarial / summary) → **73.3%**, p50 1.9 ms.
+- **Forgetting has a boundary**: `jm forget` removes layer 1 only and reports residue in `hot.md` / cold store (`residue.hot`, `residue.cold`).
+- **Backup really verifies**: `jm backup` / `jm verify` (per-file sha256 manifest, restore = copy back + `jm sync`).
+- **Reversible consolidation**: `jm consolidate` folds duplicates into the most complete entry, preview by default, files untouched.
+- **Privacy floor**: `denyScopes` can only be tightened by callers, never loosened.
+
+Download: [joint-memory 0.0.10](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%81%94%E5%90%88%E8%AE%B0%E5%BF%86) (167,150 B / 42 files, sha256 `2c77cff249fa04f1738f9119f082587ec6d479eab6936df032221369deaa9bcd`).
+Docs in the zip: `AGENT-GUIDE.md` (a stranger-AI manual + 8-point acceptance checklist), `DESIGN.md`, `CHANGELOG.md`.
+
 ## 作者
 
 | 名字 | 做了什么 |
