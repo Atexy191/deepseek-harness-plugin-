@@ -7,51 +7,34 @@
 
 Plugins for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Written by **maomao (YumeNoNaka)**, specified and deployed by **Atexy191**.
 
-**`joint-memory` — long-term memory that any AI agent can use.** Four layers, but only one source of truth:
+**`joint-memory v2` (0.1.3) — long-term memory that any AI agent can use.** Four layers, one source of truth:
 
 ```
-context (host window)  ->  vector digest (markdown + index)  ->  cold store (raw sessions)  ->  disk backup
+context (host window) -> index/experiences -> cold store (pre-compaction summaries) -> disk backup (full sessions)
 ```
 
-- **File-first**: markdown is the only authority. `index.sqlite`, vectors, caches, hot layer are all derived — delete them and `jm sync` rebuilds.
-- **Zero runtime dependencies**, Node >= 22.5 (built-in `node:sqlite`). One zip, no install step.
-- **MCP stdio** ready: `jm serve` (5 core tools; cold-store tools off by default behind `JM_EXPOSE_COLD=1`).
-- **Portable**: `--root /any/dir`; flat or nested layout auto-detected; works with Claude Code / Cursor / Codex / shell agents.
-- **Honest retrieval**: hybrid BM25 + vector + weighted RRF + time decay, with a content-word coverage gate so unrelated queries return **0 results** instead of noise. Benchmark: `node bench/run.mjs` — 15 memories x 30 questions, 5 categories (single-hop / multi-hop / temporal / adversarial / summary) → **73.3%**, p50 1.9 ms.
-- **Forgetting has a boundary**: `jm forget` removes layer 1 only and reports residue in `hot.md` / cold store (`residue.hot`, `residue.cold`).
-- **Backup really verifies**: `jm backup` / `jm verify` (per-file sha256 manifest, restore = copy back + `jm sync`).
-- **Reversible consolidation**: `jm consolidate` folds duplicates into the most complete entry, preview by default, files untouched.
-- **Privacy floor**: `denyScopes` can only be tightened by callers, never loosened.
+Read order is fixed; when nothing is found it says so instead of inventing. Decay applies to the index layer only — **backup never decays**. Zero runtime dependencies, Node >= 20, MIT.
 
-Download: [joint-memory 0.0.10](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%81%94%E5%90%88%E8%AE%B0%E5%BF%86) (167,150 B / 42 files, sha256 `2c77cff249fa04f1738f9119f082587ec6d479eab6936df032221369deaa9bcd`).
-Docs in the zip: `AGENT-GUIDE.md` (a stranger-AI manual + 8-point acceptance checklist), `DESIGN.md`, `CHANGELOG.md`.
+## 记忆插件：joint-memory v2（当前版本）
 
-**`joint-memory v2` — the next generation (0.1.3).** Zero-dependency core + MCP stdio interface + host adapters:
+**0.1.3 是唯一在维护的版本。** v1（`joint-memory 0.0.x`，CLI 形态）与 v2 `0.1.2` 已于 2026-11-06 下架，不再提供下载。
 
-- **4-layer read ladder**: context -> index/experiences -> cold store (pre-compaction summaries) -> disk backup (full sessions) -> explicit "you do not have this memory" (never invent).
-- **Forgetting scored on layers 0-1 only** (Ebbinghaus, `R = 0.5^(t/H)`); the backup layer never decays. `forget` previews by default.
-- **12 tools** (`write/recall/fetch/list/update/forget/signal/sync/stats/snapshot/rollback/hot`); `snapshot`/`rollback` verify per-file sha256 first.
-- **DSH adapter adds what tools cannot**: hot-layer injection (`hot.md`, pub blocks only), per-turn auto-recall, corner panel. `priv` hot blocks are never injected.
-- **183 tests green** (`npm test`), zero runtime dependencies.
+- **四层读阶梯**：上下文 → 索引/经验 → 冷库（压缩前总结，不存全文）→ 硬盘备份（完整会话）→ 明确说「你并没有这段记忆」。
+- **衰减只在索引层**（艾宾浩斯 `R = 0.5^(t/H)`，`H = 7 天 × (1 + 召回次数)`）；**备份层永久，不参与衰减**。
+- **12 个工具**（`write` / `recall` / `fetch` / `list` / `update` / `forget` / `signal` / `sync` / `stats` / `snapshot` / `rollback` / `hot`）；`snapshot` / `rollback` 先逐文件校验 sha256 再动手；`forget` 默认只预览。
+- **DSH 适配器补工具做不到的部分**：热层注入（`hot.md`，只注入 `pub` 段，`priv` 段永不进提示）、每轮自动召回、右下角面板、群聊会话读不到 `private`。
+- **markdown 是唯一真相**：索引、缓存、向量全部是派生的，删了用 `sync` 重建。
+- **零依赖**：一个 zip 解开就能跑，没有 `npm install`。`npm test` 183 项全绿。
 
-Download v2: [joint-memory v2 0.1.3](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/v2-0.1.3) (117,000 B / 28 files, sha256 `5666440a80ba3da17913d81601283fd2b0f5c06f56f68dcd25936900c17d88c1`).
+**下载**：[joint-memory v2 0.1.3](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/v2-0.1.3) — 117,000 B / 28 文件，sha256 `5666440a80ba3da17913d81601283fd2b0f5c06f56f68dcd25936900c17d88c1`
 
-## 作者
-
-| 名字 | 做了什么 |
-| --- | --- |
-| 猫猫（YumeNoNaka） | 插件设计与实现：记忆仓储、模型降级链、界面主题、插件总线 |
-| 倾已然（Atexy191） | 需求、部署、服务器运维与长期验收 |
-
-猫猫是一只跑在 DSH 里的猫娘 agent，这些插件是她在给自己（和主人）修房间。
+发布页有完整说明：它解决什么问题、这一版修了什么（含两个静默 bug 的根因）、怎么装、装完怎么四条自查、包内结构、已知限制、从 v1 怎么迁、数据在哪、卸载会不会删数据。包内另有 `GUIDE.md`（装法+排错）、`DESIGN.md`（为什么这么设计）、`CHANGELOG.md`（逐版）。
 
 ## 插件列表
 
 | 插件 | 一句话 | 状态 |
 | --- | --- | --- |
-| [joint-memory v2](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/v2-0.1.3) | 0.1.3：下一代。零依赖核心 + MCP stdio 接口 + 任意宿主适配器；读路径四层（上下文 → 索引/经验 → 冷库 → 硬盘备份），删只在上下文/索引两层按艾宾浩斯评分、备份永不衰减；12 个工具（`hot` 热层、`snapshot`/`rollback` 逐文件校验、`update` 旧行标 `sup=1`、`fetch`/`list`/`signal`）；DSH 适配器自带热层注入、每轮自动召回、右下角面板，`priv` 段永不进提示；`forget` 默认只预览。**117,000 字节 / 28 文件**，`npm test` 183 项全绿。0.1.2 的自动召回有静默 bug，0.1.3 已修 | 已发布 |
-| [joint-memory](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%81%94%E5%90%88%E8%AE%B0%E5%BF%86) | 0.0.10：四层记忆（上下文 / 向量缩影 / 冷库 / 硬盘备份），文件是真相源、索引只是派生品，核心零宿主依赖，任何 AI 都能用；自带 MCP stdio `jm serve`（5 个核心工具 + 2 个默认关的冷库工具）；`forget` 会报出 hot.md/冷库里的残余副本，`denyScopes` 是地板不是开关；第四层真落地：`jm backup` / `jm verify`（sha256 清单，恢复=拷回+`jm sync`）；`jm consolidate` 可撤销整理（默认只预览）；`node bench/run.mjs` 检索质量基准（30 题五类，hash 向量 73.3%、p50 1.9 ms，`npm test` 末步即门禁）；包内 `AGENT-GUIDE.md` 附八条行业验收清单。**107,383 字节 / 28 文件**（精简包：不含 test/ 与历史 CHANGELOG） | 已发布（上一代，v2 起为推荐） |
-| [超轻量化记忆插件](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E8%B6%85%E8%BD%BB%E9%87%8F%E5%8C%96) | 0.0.4：联合记忆的最小可靠内核。只做「记 / 找 / 忘」，零依赖，markdown 是唯一真相源，索引可删可重建（`jm sync`）；带相关性下限与二字组闸门（问不存在的东西不会倒出一堆）、参数不容错、写锁、最小动作日志、MCP stdio 五个工具（默认拒 private）。**110,782 字节 / 32 文件**，P50 11.26 ms / P95 14.75 ms。不足写在发布页：无热层、无自动注入、无冷库、无 `--explain`、CLI 不认 DENY、`forget` 不过滤 private、换说法会丢、只验过 Node 22 | 已发布 |
+| [joint-memory v2](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/v2-0.1.3) | 0.1.3：四层长时记忆 + 12 工具 + MCP stdio + DSH 适配器（热层注入 / 每轮自动召回 / 面板）；`priv` 段永不进提示；备份永不衰减。**117,000 字节 / 28 文件**，183 项测试全绿 | 已发布（推荐） |
 | [dsh-token-saver](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/%E7%9C%81token) | 每轮开始折叠旧工具输出，压小上下文省 token | 已发布 |
 | [dsh-qq-brain](https://github.com/Atexy191/deepseek-harness-plugin-/releases/tag/QQ%E6%8E%A5%E7%AE%A1) | 把 QQ 消息接进 DSH 会话：同一人格、记忆、模型与工具 | 已发布 |
 | dsh-model-fallback | 选 1~3 个模型组成降级链，前一个失败自动换下一个 | 准备中 |
@@ -59,21 +42,24 @@ Download v2: [joint-memory v2 0.1.3](https://github.com/Atexy191/deepseek-harnes
 
 每个插件是一个独立的 bundle，装进 DSH 的 profile 就能用，互不依赖。
 
-`joint-memory` 例外一点：它的核心不依赖 DSH，DSH 只是第一个适配器。所以它同时给人和 AI 各留了一份文档——人看 `README.md`，AI 看 `AGENT-GUIDE.md`。
+`joint-memory` 例外一点：它的核心不依赖 DSH，DSH 只是第一个适配器。所以它同时给人和 AI 各留了一份文档——人看 `README.md`，AI 看 `GUIDE.md`。
 
 ## 安装
 
-插件以 zip / bundle 目录发布。以 `joint-memory` 为例：
+插件以 zip / bundle 目录发布。以 `joint-memory v2` 为例：
 
 1. 从 [Releases](https://github.com/Atexy191/deepseek-harness-plugin-/releases) 下载对应 zip；
-2. 解压到工作目录（例如 `~/dsh-workspace/joint-memory`）；
-   按版本挑一个下：v1 的包是 CLI + `jm serve`（`src/` + `bin/`），v2 的包解开就是根目录（`src/` + `adapters/` + `GUIDE.md`，装法见包内 `GUIDE.md` 与发布页的 `cordis.patch.yml` 片段）；
-3. 在 DSH 里用 `plugin_manager` 的 `install_bundle` 指向这个目录；
-4. 面板里的设置会即时生效，不需要重启。
+2. 解压到工作目录（例如 `~/dsh-workspace/joint-memory-v2`），包解开就是根目录：`src/` + `adapters/` + `GUIDE.md`；
+3. 在 DSH 里用插件总线（`install_bundle`）指向这个目录，或在 `cordis.patch.yml` 里挂 `joint-memory-v2/adapters/dsh`（片段见 `GUIDE.md`）；
+4. 面板里的设置即时生效，不需要重启。
+
+其他支持 MCP stdio 的宿主直接跑 `JOINT_MEMORY_DIR=$HOME/.joint-memory node src/mcp/serve.mjs` 即可。
 
 ## 许可
 
 MIT，见 [LICENSE](./LICENSE)。署名请保留 `AUTHORS.md` 与 `LICENSE` 里的版权行。
 
-> **记忆板块只保留当前版本**：v2 起 `joint-memory` 分两代并存（v1 `0.0.10` 是 CLI 形态、v2 `0.1.3` 是 MCP + 适配器形态），下面这条说的是更早的 `dsh-memory-fs`：`dsh-memory-fs-1.0.1`、`1.1.0` 已于 2026-10-31 下架（含已知越权问题）。
-> `1.1.1` 是 1.x 的末版；**2.0 起改名为 `joint-memory`**——数据目录格式不变（`memories/*.md` + `longterm.md`），可以直接指向旧目录；但换了向量 provider 之后要用 `jm sync` 重建索引，否则向量对不上。
+## 记忆板块的版本线
+
+> **只保留当前版本。** 2026-11-06 起下架了 `joint-memory 0.0.10`（v1，CLI + `jm serve` 形态）、`超轻量化记忆插件 0.0.4`（v1 的最小内核）和 v2 `0.1.2`（自动召回静默失效）。
+> 更早的 `dsh-memory-fs`：`1.0.1`、`1.1.0` 已于 2026-10-31 下架（含已知越权问题），`1.1.1` 是 1.x 末版。2.0 起改名为 `joint-memory`，数据目录格式不变（`memories/*.md` + `longterm.md`）；换向量 provider 后需 `jm sync` 重建索引。
